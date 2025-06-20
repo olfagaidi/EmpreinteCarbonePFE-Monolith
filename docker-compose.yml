@@ -5,6 +5,17 @@ services:
       dockerfile: Dockerfile.backend
     ports:
       - "5000:80"
+      - "7281:443"
+    volumes:
+      - ./aspnetapp.pfx:/https/aspnetapp.pfx
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
+      - ConnectionStrings__DefaultConnection=Server=db;Database=AuthSystemDB;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
+    depends_on:
+      - db
     container_name: empreinte-backend
 
   frontend:
@@ -14,3 +25,17 @@ services:
     ports:
       - "3000:80"
     container_name: empreinte-frontend
+
+  db:
+    image: mcr.microsoft.com/mssql/server:2019-latest
+    container_name: empreinte-db
+    ports:
+      - "1433:1433"
+    environment:
+      - ACCEPT_EULA=Y
+      - SA_PASSWORD=YourStrong!Passw0rd
+    volumes:
+      - sqlserverdata:/var/opt/mssql
+
+volumes:
+  sqlserverdata:

@@ -1,3 +1,0 @@
-﻿<Project>
-  <Import Project="..\build\EmpreintCarbone.API.props" />
-</Project>

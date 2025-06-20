@@ -1,0 +1,21 @@
+# .gitignore
+# Fichiers et dossiers à exclure du suivi Git
+
+# Dossiers bin/obj de .NET
+**/bin/
+**/obj/
+
+# Dossiers .vs de Visual Studio
+.vs/
+**/.vs/
+
+# fichiers de build et de cache
+*.user
+*.suo
+*.lock
+*.db
+*.sqlite
+*.log
+
+# Node (React)
+EmpreintCarboneFrontend/node_modules/
