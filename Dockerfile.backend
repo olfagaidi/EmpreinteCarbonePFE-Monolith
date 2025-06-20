@@ -1,0 +1,13 @@
+# Étape 1 : Build
+FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
+WORKDIR /src
+
+COPY ./EmpreintCarboneBackend/ ./
+RUN dotnet restore EmpreintCarboneProject.sln
+RUN dotnet publish EmpreintCarbone/EmpreintCarbone.API.csproj -c Release -o /app/publish
+
+# Étape 2 : Runtime
+FROM mcr.microsoft.com/dotnet/aspnet:6.0
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "EmpreintCarbone.API.dll"]
