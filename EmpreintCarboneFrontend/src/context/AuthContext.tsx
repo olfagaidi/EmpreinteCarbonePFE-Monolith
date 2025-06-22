@@ -23,8 +23,8 @@ const DEMO_USERS = [
   {
     id: "1",
     username: "admin",
-    password: "admin123",
-    email: "admin@gmail.com",
+    password: "Admin123",
+    email: "olfagaidi89@gmail.com",
     role: "admin" as UserRole,
     company: "TraLIS",
     name: "Admin TraLIS",

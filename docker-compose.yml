@@ -1,3 +1,5 @@
+version: "3.8"
+
 services:
   backend:
     build:
@@ -7,13 +9,13 @@ services:
       - "5000:80"
       - "7281:443"
     volumes:
-      - ./aspnetapp.pfx:/https/aspnetapp.pfx
+      - ./aspnetapp.pfx:/https/aspnetapp.pfx:ro  # lecture seule pour plus de sécurité
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=https://+:443;http://+:80
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
-      - ConnectionStrings__DefaultConnection=Server=db;Database=AuthSystemDB;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
+      - ConnectionStrings__DefaultConnection=Server=empreinte-db;Database=AuthSystemDB;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
     depends_on:
       - db
     container_name: empreinte-backend
@@ -21,7 +23,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile.frontend
+      dockerfile: Dockerfile.frontend  # 🔁 Corrigé si Dockerfile.frontend est à la racine
     ports:
       - "3000:80"
     container_name: empreinte-frontend
@@ -33,9 +35,16 @@ services:
       - "1433:1433"
     environment:
       - ACCEPT_EULA=Y
-      - SA_PASSWORD=YourStrong!Passw0rd
+      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd  # 🔁 Correction de la variable d'environnement
     volumes:
       - sqlserverdata:/var/opt/mssql
+    healthcheck:  # ✅ Ajout pour s'assurer que SQL Server est prêt
+      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong!Passw0rd", "-Q", "SELECT 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
 
 volumes:
   sqlserverdata:
