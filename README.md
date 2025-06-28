@@ -17,6 +17,3 @@ Mon-PFE/
 ├── docker-compose.yml             # Orchestration Docker
 ├── Dockerfile.backend             # Image Backend
 ├── Dockerfile.frontend            # Image Frontend
-├── init-db.sql                    # Script SQL d'initialisation
-├── delete-user.sql                # Script SQL pour suppression
-└── aspnetapp.pfx                  # Certificat HTTPS
