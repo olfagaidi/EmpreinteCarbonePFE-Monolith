@@ -6,99 +6,34 @@ import { Area, AreaChart, Bar, BarChart, Cell, Pie, PieChart, ResponsiveContaine
 import { ChartContainer, ChartTooltipContent, ChartLegendContent } from "@/components/ui/chart";
 import { TrendingUp, TrendingDown } from "lucide-react";
 
-
-
-
-
-const DashboardPage = () => {
-
-  async function fetchEmission(endpoint: string) {
-  const token = localStorage.getItem("token"); 
-
-
-  const res = await fetch(`https://localhost:7281/api/auth/${endpoint}`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-    },
-  });
-  if (!res.ok) throw new Error("Failed to fetch " + endpoint);
-  return res.json();
-}
-const [loading, setLoading] = useState(true);
-const [transportTypes, setTransportTypes] = useState([]);
-const [emissions, setEmissions] = useState({
-  total: 0,
-  transport: 0,
-  energy: 0,
-  packaging: 0,
-  warehouse: 0,
-  waste: 0,
-  printing: 0,
-});
-
-useEffect(() => {
-  async function fetchData() {
-    try {
-      const [
-        totalRes,
-        transportRes,
-        energyRes,
-        packagingRes,
-        warehouseRes,
-        wasteRes,
-        printingRes,
-        transportTypesRes,
-      ] = await Promise.all([
-        fetchEmission("emissions/total"),
-        fetchEmission("emissions/transport"),
-        fetchEmission("emissions/energy"),
-        fetchEmission("emissions/packaging"),
-        fetchEmission("emissions/warehouse"),
-        fetchEmission("emissions/waste"),
-        fetchEmission("emissions/printing"),
-        fetchEmission("emissions/transport-types"),
-      ]);
-
-
-setTransportTypes(transportTypesRes);
-      // Extract only the numeric values
-      setEmissions({
-        total: totalRes.totalEmission,
-        transport: transportRes.transportEmission,
-        energy: energyRes.energyEmission,
-        packaging: packagingRes.packagingEmission,
-        warehouse: warehouseRes.warehouseEmission,
-        waste: wasteRes.wasteEmission,
-        printing: printingRes.printingEmission,
-      });
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  fetchData();
-}, []);
-
+const DashboardAdmin = () => {
   const { savedReports, currentFootprint } = useData();
   const [activeTab, setActiveTab] = useState("overview");
 
+  // Sample data for the dashboard
+  const totalEmissions = 248.5;
+  const transportEmissions = 104.4;
+  const energyEmissions = 69.6;
+  const otherEmissions = 74.5;
+  
+  const percentChange = 12.5;
+  const transportPercentChange = 15.2;
+  const energyPercentChange = -7.5;
+  const otherPercentChange = 16.2;
 
+  // Chart data
+  const emissionsByCategory = [
+    { name: "Transport", value: transportEmissions, color: "#3b82f6" },
+    { name: "Énergie", value: energyEmissions, color: "#ef4444" },
+    { name: "Entrepôt", value: 45.3, color: "#10b981" },
+    { name: "Consommables", value: 29.2, color: "#f59e0b" },
+  ];
 
-const emissionsByCategory = [
-  { name: "Transport", value: emissions.transport, color: "#3b82f6" },
-  { name: "Énergie", value: emissions.energy, color: "#ef4444" },
-  { name: "Entrepôt", value: emissions.warehouse, color: "#10b981" },
-  { name: "Consommables", value: emissions.packaging + emissions.waste + emissions.printing, color: "#f59e0b" },
-];
-
-const emissionsByTransportType = transportTypes.map(item => ({
-  name: item.name,
-  value: item.value,
-  color: "#0000ff", // or use item.color if available
-}));
-
+  const emissionsByTransportType = [
+    { name: "Routier", value: 70, color: "#0000ff" },
+    { name: "Maritime", value: 20, color: "#0000ff" },
+    { name: "Aérien", value: 10, color: "#0000ff" },
+  ];
 
   const monthlyData = [
     { name: "Jan", total: 120.5 },
@@ -142,8 +77,15 @@ const emissionsByTransportType = transportTypes.map(item => ({
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-               <div className="text-2xl font-bold">{emissions.total} tCO₂e</div>
-           
+                  <div className="text-2xl font-bold">{totalEmissions} tCO₂e</div>
+                  <div className={`flex items-center space-x-1 text-sm ${percentChange > 0 ? 'text-destructive' : 'text-green-500'}`}>
+                    {percentChange > 0 ? (
+                      <TrendingUp className="h-4 w-4" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                    <span>{Math.abs(percentChange)}% par rapport à l'année précédente</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -156,8 +98,15 @@ const emissionsByTransportType = transportTypes.map(item => ({
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-bold">{emissions.transport} tCO₂e</div>
-              
+                  <div className="text-2xl font-bold">{transportEmissions} tCO₂e</div>
+                  <div className={`flex items-center space-x-1 text-sm ${transportPercentChange > 0 ? 'text-destructive' : 'text-green-500'}`}>
+                    {transportPercentChange > 0 ? (
+                      <TrendingUp className="h-4 w-4" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                    <span>{Math.abs(transportPercentChange)}% par rapport à l'année précédente</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -170,8 +119,15 @@ const emissionsByTransportType = transportTypes.map(item => ({
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-                  <div className="text-2xl font-bold">{emissions.energy} tCO₂e</div>
-          
+                  <div className="text-2xl font-bold">{energyEmissions} tCO₂e</div>
+                  <div className={`flex items-center space-x-1 text-sm ${energyPercentChange > 0 ? 'text-destructive' : 'text-green-500'}`}>
+                    {energyPercentChange > 0 ? (
+                      <TrendingUp className="h-4 w-4" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                    <span>{Math.abs(energyPercentChange)}% par rapport à l'année précédente</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -184,8 +140,15 @@ const emissionsByTransportType = transportTypes.map(item => ({
               </CardHeader>
               <CardContent>
                 <div className="flex items-baseline justify-between">
-    <div className="text-2xl font-bold">{emissions.packaging + emissions.warehouse + emissions.waste + emissions.printing} tCO₂e</div>
-      
+                  <div className="text-2xl font-bold">{otherEmissions} tCO₂e</div>
+                  <div className={`flex items-center space-x-1 text-sm ${otherPercentChange > 0 ? 'text-destructive' : 'text-green-500'}`}>
+                    {otherPercentChange > 0 ? (
+                      <TrendingUp className="h-4 w-4" />
+                    ) : (
+                      <TrendingDown className="h-4 w-4" />
+                    )}
+                    <span>{Math.abs(otherPercentChange)}% par rapport à l'année précédente</span>
+                  </div>
                 </div>
               </CardContent>
             </Card>
@@ -322,4 +285,4 @@ const emissionsByTransportType = transportTypes.map(item => ({
   );
 };
 
-export default DashboardPage;
+export default DashboardAdmin;

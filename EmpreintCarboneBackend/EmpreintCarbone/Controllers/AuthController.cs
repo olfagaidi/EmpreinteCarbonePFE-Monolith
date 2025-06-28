@@ -67,11 +67,17 @@ namespace EmpreintCarbone.API.Controllers
         [HttpPost("reset-password")]
         public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordDto dto)
         {
-            var result = await _authService.ResetPassword(dto.Email, dto.NewPassword, dto.Token);
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var result = await _authService.ResetPassword(dto.Email, dto.Token, dto.NewPassword);
+
             if (!result)
                 return BadRequest("Invalid token or email.");
+
             return Ok("Password reset successfully.");
         }
+
 
         [HttpPost("archiver")]
         public async Task<IActionResult> Archiver([FromBody] string email)
@@ -164,6 +170,93 @@ namespace EmpreintCarbone.API.Controllers
         }
 
         [Authorize]
+        [HttpGet("emissions/total")]
+        public async Task<IActionResult> GetTotalEmissions()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim, out var userId))
+                return Unauthorized();
+
+            var totalEmission = await _authService.GetTotalEmissionsAsync(userId);
+            return Ok(new { userId, totalEmission });
+        }
+        [Authorize]
+        [HttpGet("emissions/transport")]
+        public async Task<IActionResult> GetTransportEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetTransportEmissionsAsync(id);
+            return Ok(new { transportEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/warehouse")]
+        public async Task<IActionResult> GetWarehouseEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetWarehouseEmissionsAsync(id);
+            return Ok(new { warehouseEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/packaging")]
+        public async Task<IActionResult> GetPackagingEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetPackagingEmissionsAsync(id);
+            return Ok(new { packagingEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/waste")]
+        public async Task<IActionResult> GetWasteEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetWasteEmissionsAsync(id);
+            return Ok(new { wasteEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/energy")]
+        public async Task<IActionResult> GetEnergyEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetEnergyEmissionsAsync(id);
+            return Ok(new { energyEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/printing")]
+        public async Task<IActionResult> GetPrintingEmission()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id)) return Unauthorized();
+            var result = await _authService.GetPrintingEmissionsAsync(id);
+            return Ok(new { printingEmission = result });
+        }
+
+        [Authorize]
+        [HttpGet("emissions/transport-types")]
+        public async Task<IActionResult> GetTransportEmissionsByType()
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (!Guid.TryParse(userId, out var id))
+                return Unauthorized();
+
+            var result = await _authService.GetTransportEmissionsByTypeAsync(id);
+
+            var formatted = result.Select(kv => new { name = kv.Key, value = kv.Value });
+
+            return Ok(formatted);
+        }
+
+
+        [Authorize]
         [HttpGet("me")]
         public async Task<IActionResult> GetCurrentUserInfo()
         {
@@ -185,6 +278,6 @@ namespace EmpreintCarbone.API.Controllers
     public record LoginDto(string Email, string Password);
 
     public record ForgotPasswordDto(string Email);
-    public record ResetPasswordDto(string Email, string NewPassword, string Token);
+    public record ResetPasswordDto(string Email, string Token ,string NewPassword);
 
 }

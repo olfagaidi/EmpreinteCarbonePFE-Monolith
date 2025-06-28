@@ -30,6 +30,7 @@ namespace EmpreintCarbone.Application.Services
                 VehicleType = x.VehicleType,
                 FuelType = x.FuelType,
                 Consumption = x.Consumption,
+                UserId = x.UserId,
                 LoadFactor = x.LoadFactor,
                 DepartureLocation = x.DepartureLocation,
                 ArrivalLocation = x.ArrivalLocation,
@@ -52,11 +53,16 @@ namespace EmpreintCarbone.Application.Services
                 FuelType = x.FuelType,
                 Consumption = x.Consumption,
                 LoadFactor = x.LoadFactor,
+                UserId = x.UserId,
                 DepartureLocation = x.DepartureLocation,
                 ArrivalLocation = x.ArrivalLocation,
                 Emission = x.Emission,
                 DateTime = x.DateTime
             };
+        }
+        public async Task<Dictionary<string, double>> GetEmissionsByTransportTypeAsync(Guid userId)
+        {
+            return await _repository.GetEmissionsByTransportTypeAsync(userId);
         }
 
         public async Task AddAsync(TransportDataDto dto)

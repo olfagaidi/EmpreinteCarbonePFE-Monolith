@@ -3,47 +3,65 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BarChart, ClipboardList, FileText, LayoutDashboard, Leaf, Upload } from "lucide-react";
+import { ArrowRight, ClipboardList, LayoutDashboard, Leaf, User, Cog,Lightbulb, BarChart2, NotebookText } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 const HomePage = () => {
   const { isAdmin } = useAuth();
 
-  const features = [
-    {
-      icon: LayoutDashboard,
-      title: "Tableau de bord",
-      description: "Visualisez un aperçu global de votre empreinte carbone",
-      link: "/dashboard",
-    },
-    {
-      icon: isAdmin() ? Upload : ClipboardList,
-      title: isAdmin() ? "Gérer comptes" : "Saisie des données",
-      description: isAdmin() 
-        ? "Creatin et gestion des comptes utilisateur" 
-        : "Saisissez manuellement les données de transport, énergie et emballages",
-      link: isAdmin() ? "/user-management" : "/data-entry",
-    },
-    {
-      icon: BarChart,
-      title: "Visualisation",
-      description: "Analysez vos émissions avec des graphiques détaillés",
-      link: "/visualization",
-    },
-    {
-      icon: FileText,
-      title: "Rapports",
-      description: "Générez des rapports PDF complets de votre empreinte carbone",
-      link: "/reports",
-    },
-    {
-      icon: Leaf,
-      title: "Recommandations",
-      description: "Obtenez des suggestions personnalisées pour réduire votre impact",
-      link: "/recommendations",
-    },
-  ];
-
+  const features = isAdmin()
+  ? [
+      {
+        icon: LayoutDashboard,
+        title: "Tableau de bord",
+        description: "Visualisez un aperçu global de votre empreinte carbone",
+        link: "/dashboard-admin",
+      },
+      {
+        icon: User,
+        title: "Gérer comptes",
+        description: "Création et gestion des comptes utilisateur",
+        link: "/user-management",
+      },
+      {
+        icon: Cog,
+        title: "Configuration des émissions",
+        description: "Modifier les facteurs d’émission et paramètres administratifs",
+        link: "/emission-config",
+      },
+    ]
+  : [
+      {
+        icon: LayoutDashboard,
+        title: "Tableau de bord",
+        description: "Visualisez un aperçu global de votre empreinte carbone",
+        link: "/dashboard",
+      },
+      {
+        icon: ClipboardList,
+        title: "Saisie des données",
+        description: "Saisissez manuellement les données de transport, énergie et emballages",
+        link: "/data-entry",
+      },
+      {
+        icon: BarChart2,
+        title: "Visualisation",
+        description: "Analysez vos émissions avec des graphiques détaillés",
+        link: "/visualization",
+      },
+      {
+        icon: NotebookText,
+        title: "Rapports",
+        description: "Générez des rapports PDF complets de votre empreinte carbone",
+        link: "/reports",
+      },
+      {
+        icon: Lightbulb,
+        title: "Recommandations",
+        description: "Obtenez des suggestions personnalisées pour réduire votre impact",
+        link: "/recommendations",
+      },
+    ];
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <section className="mb-12">
@@ -87,10 +105,11 @@ const HomePage = () => {
             </ul>
             <div className="mt-6">
               <Button asChild>
-                <Link to="/dashboard" className="flex items-center gap-2">
-                  Consulter le tableau de bord<ArrowRight className="h-4 w-4" />
-                </Link>
-              </Button>
+  <Link to={isAdmin() ? "/dashboard-admin" : "/dashboard"} className="flex items-center gap-2">
+    Consulter le tableau de bord<ArrowRight className="h-4 w-4" />
+  </Link>
+</Button>
+
             </div>
           </div>
           <div className="bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg p-6 flex items-center justify-center">

@@ -10,6 +10,7 @@ using EmpreintCarbone.Domain.Interfaces;
 using EmpreintCarbone.Application.Interfaces;
 using EmpreintCarbone.Application.DTOs;
 using EmpreintCarbone.Application.Helpers;
+using Microsoft.AspNetCore.WebUtilities;
 
 
 namespace EmpreintCarbone.Application.Services
@@ -19,13 +20,13 @@ namespace EmpreintCarbone.Application.Services
         private readonly IUserRepository _userRepository;
         private readonly Dictionary<string, (string token, DateTime expires)> _resetTokens = new();
         private readonly IMailService _mailService;
-        // Add the missing field declaration for _transportDataService
-        private readonly ITransportDataService _transportDataService;
+      
         private readonly IPackagingDataService _packagingDataService;
         private readonly IWasteDataService _wasteDataService;
         private readonly IEnergyDataService _energyDataService;
         private readonly IPrintingDataService _printingDataService;
         private readonly IWareHouseDataService _warehouseDataService;
+        private readonly ITransportDataService _transportDataService;
 
 
         public AuthService(
@@ -136,7 +137,8 @@ namespace EmpreintCarbone.Application.Services
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null) return false;
 
-            var token = Convert.ToBase64String(Guid.NewGuid().ToByteArray());
+
+            var token = WebEncoders.Base64UrlEncode(Guid.NewGuid().ToByteArray());
             var expiry = DateTime.UtcNow.AddHours(1);
             _resetTokens[email] = (token, expiry);
 
@@ -148,13 +150,14 @@ namespace EmpreintCarbone.Application.Services
         }
 
 
-        public async Task<bool> ResetPassword(string email, string newPassword, string token)
+        public async Task<bool> ResetPassword(string email, string token, string newPassword)
         {
             if (!_resetTokens.TryGetValue(email, out var tokenInfo) || tokenInfo.token != token || tokenInfo.expires < DateTime.UtcNow)
                 return false;
 
             var user = await _userRepository.GetByEmailAsync(email);
             if (user == null) return false;
+
 
             CreatePasswordHash(newPassword, out var hash, out var salt);
             user.PasswordHash = hash;
@@ -318,6 +321,69 @@ namespace EmpreintCarbone.Application.Services
             };
         }
 
+        public async Task<double> GetTotalEmissionsAsync(Guid userId)
+        {
+            var transport = await _transportDataService.GetAllByUserIdAsync(userId);
+            var warehouse = await _warehouseDataService.GetAllByUserIdAsync(userId);
+            var packaging = await _packagingDataService.GetAllByUserIdAsync(userId);
+            var waste = await _wasteDataService.GetAllByUserIdAsync(userId);
+            var energy = await _energyDataService.GetAllByUserIdAsync(userId);
+            var printing = await _printingDataService.GetAllByUserIdAsync(userId);
+
+            var total = transport.Sum(x => x.Emission)
+                      + warehouse.Sum(x => x.Emission)
+                      + packaging.Sum(x => x.Emission)
+                      + waste.Sum(x => x.Emission)
+                      + energy.Sum(x => x.Emission)
+                      + printing.Sum(x => x.Emission);
+
+            return total;
+        }
+
+
+
+        public async Task<double> GetTransportEmissionsAsync(Guid userId)
+        {
+            var data = await _transportDataService.GetAllByUserIdAsync(userId);
+            Console.WriteLine($"Count: {data.Count()}, Emissions: {string.Join(",", data.Select(x => x.Emission))}");
+            return data.Sum(x => x.Emission);
+
+        }
+
+        public async Task<double> GetWarehouseEmissionsAsync(Guid userId)
+        {
+            var data = await _warehouseDataService.GetAllByUserIdAsync(userId);
+            return data.Sum(x => x.Emission);
+        }
+
+        public async Task<double> GetPackagingEmissionsAsync(Guid userId)
+        {
+            var data = await _packagingDataService.GetAllByUserIdAsync(userId);
+            return data.Sum(x => x.Emission);
+        }
+
+        public async Task<double> GetWasteEmissionsAsync(Guid userId)
+        {
+            var data = await _wasteDataService.GetAllByUserIdAsync(userId);
+            return data.Sum(x => x.Emission);
+        }
+
+        public async Task<double> GetEnergyEmissionsAsync(Guid userId)
+        {
+            var data = await _energyDataService.GetAllByUserIdAsync(userId);
+            return data.Sum(x => x.Emission);
+        }
+
+        public async Task<double> GetPrintingEmissionsAsync(Guid userId)
+        {
+            var data = await _printingDataService.GetAllByUserIdAsync(userId);
+            return data.Sum(x => x.Emission);
+        }
+
+        public async Task<Dictionary<string, double>> GetTransportEmissionsByTypeAsync(Guid userId)
+        {
+            return await _transportDataService.GetEmissionsByTransportTypeAsync(userId);
+        }
 
 
     }

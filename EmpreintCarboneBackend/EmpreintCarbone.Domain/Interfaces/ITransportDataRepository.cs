@@ -15,6 +15,8 @@ namespace EmpreintCarbone.Domain.Interfaces
         Task UpdateAsync(TransportData data);
         Task DeleteAsync(Guid id);
         Task<IEnumerable<TransportData>> GetAllByUserIdAsync(Guid userId);
+        Task<Dictionary<string, double>> GetEmissionsByTransportTypeAsync(Guid userId);
+
 
     }
 }

@@ -30,11 +30,11 @@ namespace EmpreintCarbone.Application.Services
                 PackagingType = x.PackagingType,
                 Weight = x.Weight,
                 Quantity = x.Quantity,
-
                 PalletCount = x.PalletCount,
                 PalletWeight = x.PalletWeight,
                 PalletType = x.PalletType,
                 Emission = x.Emission,
+                UserId = x.UserId,
                 DateTime = x.DateTime
 
             });
@@ -53,11 +53,10 @@ namespace EmpreintCarbone.Application.Services
                 PackagingType = x.PackagingType,
                 Weight = x.Weight,
                 Quantity = x.Quantity,
- 
-                
                 PalletCount = x.PalletCount,
                  PalletWeight = x.PalletWeight,
                 PalletType = x.PalletType,
+                UserId = x.UserId,
                 Emission = x.Emission,
                 DateTime = x.DateTime
 
@@ -87,8 +86,6 @@ namespace EmpreintCarbone.Application.Services
                 PackagingType = dto.PackagingType,
                 Weight = dto.Weight,
                 Quantity = dto.Quantity,
-
-             
                 PalletCount = dto.PalletCount,
                 PalletWeight = dto.PalletWeight,
                 PalletType = dto.PalletType,
@@ -106,37 +103,31 @@ namespace EmpreintCarbone.Application.Services
         {
             if (dto.Id == null) throw new ArgumentException("Id is required for update");
 
-            double emission = 0;
+            var existing = await _repository.GetByIdAsync(dto.Id.Value) ?? throw new KeyNotFoundException("PackagingData not found");
+            existing.PackagingType = dto.PackagingType;
+            existing.Weight = dto.Weight;
+            existing.Quantity = dto.Quantity;
+            existing.PalletCount = dto.PalletCount;
+            existing.PalletWeight = dto.PalletWeight;
+            existing.PalletType = dto.PalletType;
+            existing.UserId = dto.UserId;
+            existing.DateTime = dto.DateTime;
 
             if (dto.Weight.HasValue && !string.IsNullOrWhiteSpace(dto.PackagingType))
             {
                 try
                 {
-                    emission = EmissionCalculator.CalculatePackagingEmission(dto.Weight.Value, dto.PackagingType);
+                    existing.Emission = EmissionCalculator.CalculatePackagingEmission(dto.Weight.Value, dto.PackagingType);
                 }
                 catch (ArgumentException ex)
                 {
-                   Console.WriteLine($"{ex.Message}");
+                    Console.WriteLine(ex.Message);
                 }
             }
-            var entity = new PackagingData
-            {
-                Id = Guid.NewGuid(),
- 
-                PackagingType = dto.PackagingType,
-                Weight = dto.Weight,
-                Quantity = dto.Quantity,
-                
-                PalletCount = dto.PalletCount,
-                PalletWeight = dto.PalletWeight,
-                PalletType = dto.PalletType,
-                UserId = dto.UserId,
-                Emission = emission,
-                DateTime = dto.DateTime
-            };
 
-            await _repository.UpdateAsync(entity);
+            await _repository.UpdateAsync(existing);
         }
+
         public async Task<IEnumerable<PackagingDataDto>> GetAllByUserIdAsync(Guid userId)
         {
             var items = await _repository.GetAllByUserIdAsync(userId);
@@ -147,8 +138,6 @@ namespace EmpreintCarbone.Application.Services
                 PackagingType = x.PackagingType,
                 Weight = x.Weight,
                 Quantity = x.Quantity,
- 
-               
                 PalletCount = x.PalletCount,
                 PalletWeight = x.PalletWeight,
                 PalletType = x.PalletType,

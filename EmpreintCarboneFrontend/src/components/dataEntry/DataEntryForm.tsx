@@ -32,6 +32,9 @@ const DataEntryForm = () => {
     updatePrintingData(currentData.printing);
   };
 
+ 
+
+
   const handleProceedToCalculation = () => {
     handleSaveAll();
     navigate("/calculation");
@@ -71,6 +74,8 @@ const DataEntryForm = () => {
         <Button onClick={handleProceedToCalculation} className="flex items-center gap-2">
           Lancer le calcul <ArrowRight className="h-4 w-4" />
         </Button>
+        
+ 
       </div>
     </div>
   );

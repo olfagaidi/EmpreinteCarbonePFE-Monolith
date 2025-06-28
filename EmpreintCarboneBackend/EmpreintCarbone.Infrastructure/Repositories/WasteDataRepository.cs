@@ -45,10 +45,10 @@ namespace EmpreintCarbone.Infrastructure.Repositories
 
         public async Task DeleteAsync(Guid id)
         {
-            var data = await _context.WarehouseData.FindAsync(id);
+            var data = await _context.WasteData.FindAsync(id);
             if (data != null)
             {
-                _context.WarehouseData.Remove(data);
+                _context.WasteData.Remove(data);
                 await _context.SaveChangesAsync();
             }
         }

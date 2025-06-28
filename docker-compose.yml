@@ -1,50 +1,54 @@
 version: "3.8"
 
 services:
-  backend:
-    build:
-      context: .
-      dockerfile: Dockerfile.backend
-    ports:
-      - "5000:80"
-      - "7281:443"
-    volumes:
-      - ./aspnetapp.pfx:/https/aspnetapp.pfx:ro  # lecture seule pour plus de sécurité
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=https://+:443;http://+:80
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=12345678
-      - ConnectionStrings__DefaultConnection=Server=empreinte-db;Database=AuthSystemDB;User=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;
-    depends_on:
-      - db
-    container_name: empreinte-backend
-
-  frontend:
-    build:
-      context: .
-      dockerfile: Dockerfile.frontend  # 🔁 Corrigé si Dockerfile.frontend est à la racine
-    ports:
-      - "3000:80"
-    container_name: empreinte-frontend
-
   db:
     image: mcr.microsoft.com/mssql/server:2019-latest
     container_name: empreinte-db
     ports:
-      - "1433:1433"
+      - "1400:1433"
     environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong!Passw0rd  # 🔁 Correction de la variable d'environnement
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "olfa!gaidi@123"
     volumes:
-      - sqlserverdata:/var/opt/mssql
-    healthcheck:  # ✅ Ajout pour s'assurer que SQL Server est prêt
-      test: ["CMD", "/opt/mssql-tools/bin/sqlcmd", "-S", "localhost", "-U", "sa", "-P", "YourStrong!Passw0rd", "-Q", "SELECT 1"]
+      - empreinte-db-data:/var/opt/mssql
+    healthcheck:
+      test: >
+        ["CMD", "/opt/mssql-tools/bin/sqlcmd",
+         "-U", "sa", "-P", "olfa!gaidi@123",
+         "-Q", "SELECT 1"]
       interval: 10s
-      timeout: 5s
       retries: 5
-    restart: unless-stopped
 
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: empreinte-backend
+    ports:
+      - "7281:443"
+    environment:
+      # Database connection settings
+      DB_HOST: db
+      DB_PORT: 1433
+      DB_NAME: empreinte_db
+      DB_USER: sa
+      DB_PASSWORD: olfa!gaidi@123
+      # (add any other env vars your app needs)
+    depends_on:
+      db:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend  
+    container_name: empreinte-frontend
+    ports:
+      - "3000:80"
+    # if your frontend needs to call the backend via env:
+    environment:
+      REACT_APP_API_URL: https://empreinte-backend:443
 
 volumes:
-  sqlserverdata:
+  empreinte-db-data:
+    name: empreinte-db-data

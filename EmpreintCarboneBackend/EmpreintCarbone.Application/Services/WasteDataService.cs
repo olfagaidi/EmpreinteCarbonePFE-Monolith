@@ -29,7 +29,7 @@ namespace EmpreintCarbone.Application.Services
        
                 WasteType = x.WasteType,
                 Quantity = x.Quantity,
-       
+                UserId = x.UserId,
                 TreatmentMethod = x.TreatmentMethod,
                 Emission = x.Emission,
                 DateTime = x.DateTime
@@ -48,7 +48,7 @@ namespace EmpreintCarbone.Application.Services
   
                 WasteType = x.WasteType,
                 Quantity = x.Quantity,
- 
+                UserId = x.UserId,
                 TreatmentMethod = x.TreatmentMethod,
                 Emission = x.Emission,
                 DateTime = x.DateTime
@@ -79,11 +79,9 @@ namespace EmpreintCarbone.Application.Services
 
             var entity = new WasteData
             {
-                Id = Guid.NewGuid(),
-       
+                Id = dto.Id.Value,
                 WasteType = dto.WasteType,
                 Quantity = dto.Quantity,
-
                 TreatmentMethod = dto.TreatmentMethod,
                 UserId = dto.UserId,
                 Emission = EmissionCalculator.CalculateWasteEmission(dto.Quantity, dto.WasteType),

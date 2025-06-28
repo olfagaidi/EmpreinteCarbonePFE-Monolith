@@ -70,19 +70,19 @@ namespace EmpreintCarbone.API.Controllers
         }
 
 
-        [HttpPost("calculate-emission")]
-        public IActionResult CalculateEmission([FromBody] TransportDataDto dto)
-        {
-            try
-            {
-                var emission = _service.CalculateEmission(dto);
-                return Ok(new { Emission = emission });
-            }
-            catch (ArgumentException ex)
-            {
-                return BadRequest(ex.Message);
-            }
-        }
+        //[HttpPost("calculate-emission")]
+        //public IActionResult CalculateEmission([FromBody] TransportDataDto dto)
+        //{
+        //    try
+        //    {
+        //        var emission = _service.CalculateEmission(dto);
+        //        return Ok(new { Emission = emission });
+        //    }
+        //    catch (ArgumentException ex)
+        //    {
+        //        return BadRequest(ex.Message);
+        //    }
+        //}
 
         private Guid GetUserId()
         {

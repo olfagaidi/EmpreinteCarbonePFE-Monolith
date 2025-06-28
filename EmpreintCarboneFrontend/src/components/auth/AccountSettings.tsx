@@ -110,6 +110,19 @@ const AccountSettings = () => {
 
 const [avatarBase64, setAvatarBase64] = useState<string | null>(null);
 
+const base64ToFile = (base64: string, filename: string): File => {
+  const arr = base64.split(",");
+  const mime = arr[0].match(/:(.*?);/)?.[1];
+  const bstr = atob(arr[1]);
+  let n = bstr.length;
+  const u8arr = new Uint8Array(n);
+
+  while (n--) {
+    u8arr[n] = bstr.charCodeAt(n);
+  }
+
+  return new File([u8arr], filename, { type: mime });
+};
 
 
 // Après tous les useEffect et const
@@ -118,48 +131,46 @@ const handleAvatarClick = () => fileInputRef.current?.click();
 
 // ⬇️ COPIE-COLLE cette version AVANT le return()
 const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
-  const file = event.target.files?.[0];
-  if (!file) return;
+ const file = event.target.files?.[0];
+if (!file) return;
 
-  if (file.size > 2 * 1024 * 1024) {
-    toast.error("Image trop grande (max 2 Mo)");
+const reader = new FileReader();
+reader.onloadend = async () => {
+  const base64 = reader.result?.toString();
+  if (!base64) {
+    toast.error("Erreur de lecture de l’image");
     return;
   }
 
-  const reader = new FileReader();
-  reader.onloadend = async () => {
-    const base64 = reader.result?.toString(); // data:image/jpeg;base64,...
-    if (!base64) {
-      toast.error("Erreur de lecture de l’image");
-      return;
-    }
+  const imageFile = base64ToFile(base64, file.name); // ✅ convert base64 to File
 
-    try {
-      const existingData = form.getValues();
-      const formData = new FormData();
+  try {
+    const existingData = form.getValues();
+    const formData = new FormData();
 
-      Object.entries(existingData).forEach(([key, value]) => {
-        if (value !== undefined && value !== null) {
-          formData.append(key, value.toString());
-        }
-      });
+    Object.entries(existingData).forEach(([key, value]) => {
+      if (value !== undefined && value !== null) {
+        formData.append(key, value.toString());
+      }
+    });
 
-      formData.append("Photo", base64); // IMPORTANT: nom du champ exact attendu par le backend
+    formData.append("Photo", imageFile); // ✅ now this is a real file
 
-      await api.put("/Auth/update-profile", formData, {
-        headers: { "Content-Type": "multipart/form-data" },
-      });
+    await api.put("/Auth/update-profile", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
 
-      const updatedUser = await profileService.getCurrentUser();
-      updateAuthState(updatedUser);
-      toast.success("Photo mise à jour !");
-    } catch (err) {
-      toast.error("Erreur lors de l’envoi de la photo");
-      console.error(err);
-    }
-  };
+    const updatedUser = await profileService.getCurrentUser();
+    updateAuthState(updatedUser);
+    toast.success("Photo mise à jour !");
+  } catch (err) {
+    toast.error("Erreur lors de l’envoi de la photo");
+    console.error(err);
+  }
+};
 
-  reader.readAsDataURL(file);
+reader.readAsDataURL(file); // This remains the same
+
 };
 
 
@@ -188,7 +199,8 @@ const handleAvatarUpload = async (event: React.ChangeEvent<HTMLInputElement>) =>
       {/* 🧠 Avatar avec icône caméra superposée */}
       <div className="relative">
         <Avatar className="h-24 w-24">
-          <AvatarImage src={authState.user?.photo} />
+        <AvatarImage src={authState.user?.photo ? `data:image/jpeg;base64,${authState.user.photo}` : undefined} />
+
           <AvatarFallback>
             <User className="h-12 w-12" />
           </AvatarFallback>

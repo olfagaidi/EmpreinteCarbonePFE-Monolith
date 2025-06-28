@@ -12,7 +12,7 @@ import ForgotPassword from "./components/auth/ForgotPassword";
 import ResetPassword from "./components/auth/ResetPassword";
 import HomePage from "./components/home/HomePage";
 import DataEntryForm from "./components/dataEntry/DataEntryForm";
-
+import DashboardAdmin from "./components/dashboard/DashboardAdmin";
 import CalculationPage from "./components/calculator/CalculationPage";
 import VisualizationPage from "./components/visualization/VisualizationPage";
 import UserRegistration from "./components/admin/UserRegistration";
@@ -144,6 +144,14 @@ const App = () => (
                   </AdminRoute>
                 </AuthenticatedLayout>
               } />
+              <Route path="/dashboard-admin" element={
+                <AuthenticatedLayout  >
+                  <AdminRoute>
+                    <DashboardAdmin />
+                  </AdminRoute>
+                </AuthenticatedLayout>
+              }
+              />
               <Route 
                 path="/profile"
                 element={

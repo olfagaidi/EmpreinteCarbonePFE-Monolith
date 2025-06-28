@@ -15,7 +15,10 @@ namespace EmpreintCarbone.Application.Interfaces
         Task UpdateAsync(TransportDataDto dto);
         Task DeleteAsync(Guid id);
         Task<IEnumerable<TransportDataDto>> GetAllByUserIdAsync(Guid userId);
-        double CalculateEmission(TransportDataDto dto);
+
+        Task<Dictionary<string, double>> GetEmissionsByTransportTypeAsync(Guid userId);
+
+        //double CalculateEmission(TransportDataDto dto);
 
 
     }

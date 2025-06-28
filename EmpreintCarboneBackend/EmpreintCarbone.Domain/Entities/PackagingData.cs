@@ -13,7 +13,6 @@ namespace EmpreintCarbone.Domain.Entities
         public double? Weight { get; set; }
         public int Quantity { get; set; }
         public DateTime DateTime { get; set; } = DateTime.UtcNow;
-        
         public int? PalletCount { get; set; }
         public double? PalletWeight { get; set; }
         public string? PalletType { get; set; }

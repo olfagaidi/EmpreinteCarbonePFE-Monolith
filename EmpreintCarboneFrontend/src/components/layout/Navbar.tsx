@@ -1,27 +1,9 @@
 import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
-import {
-  LayoutDashboard,
-  FileInput,
-  Calculator,
-  BarChart2,
-  NotebookText,
-  Lightbulb,
-  Users,
-  LogOut,
-  Settings,
-  Cog,
-} from "lucide-react";
+import {LayoutDashboard,FileInput,Calculator,BarChart2,NotebookText,Lightbulb,Users,LogOut,Settings,Cog, ClipboardList,} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import {DropdownMenu,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator,DropdownMenuTrigger,} from "@/components/ui/dropdown-menu";
 
 const Navbar = () => {
   const { authState, logout } = useAuth();
@@ -66,17 +48,16 @@ const Navbar = () => {
         {/* Liens visibles sur desktop */}
         <div className="hidden md:flex gap-2">
   <NavLink to="/home" icon={LayoutDashboard} label="Accueil" />
-  <NavLink to="/dashboard" icon={LayoutDashboard} label="Tableau de bord" />
-  
   {user?.role === "admin" ? (
     <>
-      
+      <NavLink to="/dashboard-admin" icon={LayoutDashboard} label="Tableau de bord"  /> 
       <NavLink to="/user-management" icon={Users} label="Gestion des utilisateurs" />
       <NavLink to="/emission-config" icon={Cog} label="Configuration des émissions" />
     </>
   ) : (
     <>
-      <NavLink to="/data-entry" icon={FileInput} label="Saisie des données" />
+      <NavLink to="/dashboard" icon={LayoutDashboard} label="Tableau de bord" />
+      <NavLink to="/data-entry" icon={ClipboardList} label="Saisie des données" />
       <NavLink to="/calculation" icon={Calculator} label="Calcul CO₂" />
       <NavLink to="/visualization" icon={BarChart2} label="Visualisation" />
       <NavLink to="/reports" icon={NotebookText} label="Rapports" />

@@ -43,6 +43,15 @@ namespace EmpreintCarbone.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Dictionary<string, double>> GetEmissionsByTransportTypeAsync(Guid userId)
+        {
+            return await _context.TransportData
+                .Where(t => t.UserId == userId)
+                .GroupBy(t => t.VehicleType)
+                .Select(g => new { Type = g.Key, TotalEmission = g.Sum(t => t.Emission) })
+                .ToDictionaryAsync(g => g.Type, g => g.TotalEmission);
+        }
+
 
         public async Task DeleteAsync(Guid id)
         {

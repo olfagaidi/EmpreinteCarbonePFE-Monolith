@@ -12,7 +12,6 @@ namespace EmpreintCarbone.Application.DTOs
         public string? PackagingType { get; set; }
         public double? Weight { get; set; }
         public int Quantity { get; set; }
-        
         public int? PalletCount { get; set; }
         public double? PalletWeight { get; set; }
         public string? PalletType { get; set; }

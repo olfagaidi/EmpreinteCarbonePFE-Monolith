@@ -13,6 +13,7 @@ namespace EmpreintCarbone.Application.Helpers
         private readonly IEnumerable<WasteDataDto> _wasteData;
         private readonly IEnumerable<EnergyDataDto> _energyData;
         private readonly IEnumerable<PrintingDataDto> _printingData;
+        private readonly DateTime _generationTime;
 
         public UserEmissionReportDocument(
             IEnumerable<TransportDataDto> transportData,
@@ -28,20 +29,21 @@ namespace EmpreintCarbone.Application.Helpers
             _wasteData = wasteData;
             _energyData = energyData;
             _printingData = printingData;
+            _generationTime = DateTime.UtcNow;
         }
 
         private const double EmissionThreshold = 500.0; 
 
         private const string HighEmissionAdvice =
-            "Vos émissions sont supérieures aux niveaux recommandés. Veuillez envisager de:\n" +
-            "- Réduire l'utilisation de la voiture ou passer à un moyen de transport électrique.\n" +
-            "- Optimiser la consommation énergétique des entrepôts.\n" +
-            "- Réduire les emballages et les déchets.\n" +
-            "- Utiliser des sources d’énergie renouvelables lorsque cela est possible.";
+            "Your emissions are higher than recommended. Please consider:\n" +
+            "- Reducing car usage or switching to electric transport.\n" +
+            "- Optimizing warehouse energy consumption.\n" +
+            "- Minimizing packaging and waste.\n" +
+            "- Using renewable energy sources when possible.";
 
         private const string GoodEmissionMessage =
-            "Félicitations ! Vos émissions sont conformes aux seuils recommandés et reflètent un comportement respectueux de l’environnement.\n" +
-            "Poursuivez vos efforts actuels afin de préserver une empreinte carbone durable et contribuer activement à la protection de l’environnement.";
+            "Great job! Your emissions are within an environmentally friendly range.\n" +
+            "Keep up the good practices to maintain a sustainable footprint.";
 
 
 
@@ -66,21 +68,24 @@ namespace EmpreintCarbone.Application.Helpers
                 page.PageColor(Colors.White);
                 page.DefaultTextStyle(x => x.FontSize(12));
 
-                page.Header()
-    .Column(column =>
-    {
-        column.Item().Text("Carbon Footprint–TraLIS")
-            .FontSize(25)
-            .Bold()
-            .FontColor("#10B981") 
-            .AlignCenter();
+                // 👇 Replaced header starts here
+                page.Header().Element(header =>
+                {
+                    header.Column(col =>
+                    {
+                        col.Item().Text("User Emission Report")
+                            .FontSize(20)
+                            .Bold()
+                            .FontColor(Colors.Blue.Medium)
+                            .AlignCenter();
 
-        column.Item().Text("Module de calcul d'empreinte carbone")
-            .FontSize(12)
-            .FontColor("#6B7280") 
-            .AlignCenter();
-    });
-
+                        col.Item().Text($"Generated on: {_generationTime:yyyy-MM-dd HH:mm:ss} UTC")
+                            .FontSize(10)
+                            .FontColor(Colors.Grey.Medium)
+                            .AlignCenter();
+                    });
+                });
+                // 👆 Replaced header ends here
 
                 page.Content().PaddingVertical(15).Element(content =>
                 {
@@ -99,9 +104,9 @@ namespace EmpreintCarbone.Application.Helpers
                                       .Padding(10)
                                       .Column(col =>
                                       {
-                                          col.Item().Text("⚠ Émissions élevées détectées").Bold().FontSize(14).FontColor(Colors.Red.Medium);
+                                          col.Item().Text("⚠ High Emissions Detected").Bold().FontSize(14).FontColor(Colors.Red.Medium);
                                           col.Item().Text(HighEmissionAdvice).FontColor(Colors.Black);
-                                          col.Item().Text($"Émissions totales: {totalEmission:0.##} kg CO₂").FontColor(Colors.Red.Darken1).Bold();
+                                          col.Item().Text($"Total Emissions: {totalEmission:0.##} kg CO₂").FontColor(Colors.Red.Darken1).Bold();
                                       });
                             }
                             else
@@ -111,7 +116,7 @@ namespace EmpreintCarbone.Application.Helpers
                                       .Padding(10)
                                       .Column(col =>
                                       {
-                                          col.Item().Text("✅ Niveau d’émissions : Satisfaisant").Bold().FontSize(14).FontColor(Colors.Green.Medium);
+                                          col.Item().Text("✅ Emission Status: Good").Bold().FontSize(14).FontColor(Colors.Green.Medium);
                                           col.Item().Text(GoodEmissionMessage).FontColor(Colors.Black);
                                           col.Item().Text($"Total Emissions: {totalEmission:0.##} kg CO₂").FontColor(Colors.Green.Darken1).Bold();
                                       });
@@ -130,18 +135,19 @@ namespace EmpreintCarbone.Application.Helpers
         }
 
 
+
         void ComposeContent(ColumnDescriptor column)
         {
             column.Item().Element(container =>
             {
                 container.Column(innerColumn =>
                 {
-                    AddEmissionTable(innerColumn, "Émissions liées au transport", "Type de carburant", _transportData.Select(x => (x.FuelType, x.Emission)));
-                    AddEmissionTable(innerColumn, "Émissions des entrepôts", "Type d’énergie", _warehouseData.Select(x => (x.EnergyType, x.Emission)));
-                    AddEmissionTable(innerColumn, "Émissions liées aux emballages", "Type d’emballage", _packagingData.Select(x => (x.PackagingType, x.Emission)));
-                    AddEmissionTable(innerColumn, "Émissions dues aux déchets", "Type de déchet", _wasteData.Select(x => (x.WasteType, x.Emission)));
-                    AddEmissionTable(innerColumn, "Émissions liées à l’énergie", "Type d’énergie", _energyData.Select(x => (x.EnergyType, x.Emission)));
-                    AddEmissionTable(innerColumn, "Émissions liées à l’impression", "Type d’impression", _printingData.Select(x => (x.PrintType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Transport Emissions", "Fuel Type", _transportData.Select(x => (x.FuelType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Warehouse Emissions", "Energy Type", _warehouseData.Select(x => (x.EnergyType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Packaging Emissions", "Packaging Type", _packagingData.Select(x => (x.PackagingType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Waste Emissions", "Waste Type", _wasteData.Select(x => (x.WasteType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Energy Emissions", "Energy Type", _energyData.Select(x => (x.EnergyType, x.Emission)));
+                    AddEmissionTable(innerColumn, "Printing Emissions", "Print Type", _printingData.Select(x => (x.PrintType, x.Emission)));
                 });
             });
         }
